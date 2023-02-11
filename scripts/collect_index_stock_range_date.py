@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import argparse
-import csv
 
 import mysql.connector
-
-header = ["Code", "Start_date", "End_date"]
 
 
 class ExportCodeData(object):
@@ -43,14 +40,10 @@ class ExportCodeData(object):
 
             cursor.execute(query)
 
-            with open('%s/instruments/sh300.csv' % dir, 'w', newline='') as csvfile:
-                writer = csv.writer(csvfile, delimiter=',',
-                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                writer.writerow(header)
-
+            with open('%s/instruments/sh300.txt' % dir, 'w') as fp:
                 for row in cursor:
                     list_row = list(row)
-                    writer.writerow(list_row)
+                    fp.write(list_row[0] + '\t' + list_row[1] + '\t' + list_row[2] + '\n')
 
 
 if __name__ == '__main__':

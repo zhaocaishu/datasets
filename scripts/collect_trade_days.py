@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import argparse
-import csv
 
 import mysql.connector
-
-header = ["Date"]
 
 
 class ExportCodeData(object):
@@ -41,14 +38,10 @@ class ExportCodeData(object):
 
             cursor.execute(query)
 
-            with open('%s/%s' % (dir, 'calendars/days.txt'), 'w', newline='') as csvfile:
-                writer = csv.writer(csvfile, delimiter=',',
-                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                writer.writerow(header)
-
+            with open('%s/calendars/days.txt' % dir, 'w') as fp:
                 for row in cursor:
                     list_row = list(row)
-                    writer.writerow(list_row)
+                    fp.write(list_row[0] + '\n')
 
 
 if __name__ == '__main__':
