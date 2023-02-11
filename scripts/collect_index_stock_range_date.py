@@ -4,7 +4,6 @@ import argparse
 import csv
 
 import mysql.connector
-from logger import logger
 
 header = ["Code", "Start_date", "End_date"]
 
@@ -22,7 +21,7 @@ class ExportCodeData(object):
             cursor.execute("SHOW TABLES")
 
             for table in cursor:
-                logger.info(table)
+                print(table)
 
     def export_data(self, dir):
         """导出数据到文件
@@ -69,9 +68,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # 解析命令行中的参数
-    logger.info("Begin export data, dir: %s" % args.dir)
+    print("Begin export data, dir: %s" % args.dir)
 
     export = ExportCodeData(args)
     export.export_data(args.dir)
 
-    logger.info("End export data")
+    print("End export data")

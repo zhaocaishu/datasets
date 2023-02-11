@@ -4,7 +4,6 @@ import argparse
 import csv
 
 import mysql.connector
-from logger import logger
 
 
 header = ["Code", "Date", "Open", "High", "Low", "Close", "Pre_Close", "Change",
@@ -25,7 +24,7 @@ class ExportCodeData(object):
             cursor.execute("SHOW TABLES")
 
             for table in cursor:
-                logger.info(table)
+                print(table)
 
     def top_codes(self, amount) -> list:
         """抽取靠谱的股票数
@@ -40,7 +39,7 @@ class ExportCodeData(object):
             for code in cursor:
                 codes.append(code[0])
 
-        logger.info("Codes: %d, %s" % (len(codes), ",".join(codes)))
+        print("Codes: %d, %s" % (len(codes), ",".join(codes)))
 
         return codes
 
@@ -109,9 +108,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # 解析命令行中的参数，得到需要爬取的数据、日期范围
-    logger.info("Begin export data, dir: %s, amount: %d, trade_date: %s" % (args.dir, args.amount, args.trade_date))
+    print("Begin export data, dir: %s, amount: %d, trade_date: %s" % (args.dir, args.amount, args.trade_date))
 
     export = ExportCodeData(args)
     export.export_data(args.dir, args.amount, args.trade_date)
 
-    logger.info("End export data")
+    print("End export data")
