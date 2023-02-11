@@ -5,7 +5,7 @@ import csv
 
 import mysql.connector
 
-header = ["Code", "Start_date", "End_date"]
+header = ["Date"]
 
 
 class ExportCodeData(object):
@@ -34,16 +34,14 @@ class ExportCodeData(object):
         # 从数据库导出数据
         with self.connection.cursor() as cursor:
             # 查询数据
-            query = "SELECT ts_code, " \
-                    "MIN(date_format(trade_date, '%Y-%m-%d')), " \
-                    "MAX(date_format(trade_date, '%Y-%m-%d')) " \
-                    "FROM ts_idx_index_weight WHERE index_code='000300.SH' GROUP BY ts_code"
+            query = "SELECT DISTINCT date_format(trade_date, '%Y-%m-%d') " \
+                    "FROM ts_quotation_daily order by trade_date ASC"
 
             print(query)
 
             cursor.execute(query)
 
-            with open('%s/instruments/sh300.csv' % dir, 'w', newline='') as csvfile:
+            with open('%s/%s' % (dir, 'calendars/days.txt'), 'w', newline='') as csvfile:
                 writer = csv.writer(csvfile, delimiter=',',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                 writer.writerow(header)
@@ -55,7 +53,7 @@ class ExportCodeData(object):
 
 if __name__ == '__main__':
     """主程序，解析参数，并执行相关的命令"""
-    parser = argparse.ArgumentParser(description='获取指数里每个股票的起止时间')
+    parser = argparse.ArgumentParser(description='获取全部交易日期')
     parser.add_argument('-dir', required=True, type=str,
                         help='Dir of the files')
     parser.add_argument('-host', required=True, type=str,
@@ -67,7 +65,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # 解析命令行中的参数
+    # 解析命令行中的参数，得到全部交易日期
     print("Begin export data, dir: %s" % args.dir)
 
     export = ExportCodeData(args)

@@ -31,7 +31,7 @@ class ExportCodeData(object):
         :param amount: 单位千
         """
         codes = []
-        query = "SELECT distinct(ts_code) FROM ts_quotation_daily WHERE amount >= %d and trade_date>=20220101" % (
+        query = "SELECT DISTINCT(ts_code) FROM ts_quotation_daily WHERE amount >= %d and trade_date>=20220101" % (
             amount)
 
         with self.connection.cursor() as cursor:
