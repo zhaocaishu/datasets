@@ -6,7 +6,7 @@ import csv
 import mysql.connector
 
 
-header = ["Code", "Date", "Open", "High", "Low", "Close", "Pre_Close", "Change",
+header = ["Symbol", "Date", "Open", "High", "Low", "Close", "Pre_Close", "Change",
           "Pct_Chg", "Volume", "AMount", "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps',
           'Ps_ttm', 'Dv_ratio', 'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv', 'Circ_mv']
 
