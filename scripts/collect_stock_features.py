@@ -5,10 +5,9 @@ import csv
 
 import mysql.connector
 
-
-header = ["Symbol", "Date", "Open", "High", "Low", "Close", "Pre_Close", "Change",
-          "Pct_Chg", "Volume", "AMount", "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps',
-          'Ps_ttm', 'Dv_ratio', 'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv', 'Circ_mv']
+header = ["Symbol", "Date", "Open", "High", "Low", "Close", "Pre_Close", "Change", "Pct_Chg", "Volume", "AMount",
+          "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps', 'Ps_ttm', 'Dv_ratio',
+          'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv', 'Circ_mv', 'Adj_factor']
 
 
 class ExportCodeData(object):
@@ -26,13 +25,12 @@ class ExportCodeData(object):
             for table in cursor:
                 print(table)
 
-    def top_codes(self, amount) -> list:
-        """抽取靠谱的股票数
-        :param amount: 单位千
+    def get_codes(self) -> list:
+        """获取一年以上在主板上市的股票
         """
         codes = []
-        query = "SELECT DISTINCT(ts_code) FROM ts_quotation_daily WHERE amount >= %d and trade_date>=20220101" % (
-            amount)
+        query = "SELECT ts_code FROM ts_basic_stock_list WHERE list_status='L' AND market='主板' " \
+                "AND DATEDIFF(NOW(), DATE_FORMAT(list_date, '%Y%m%d')) >= 360"
 
         with self.connection.cursor() as cursor:
             cursor.execute(query)
@@ -43,18 +41,17 @@ class ExportCodeData(object):
 
         return codes
 
-    def export_data(self, dir, amount, trade_date):
+    def export_data(self, dir, trade_date):
         """导出数据到文件
         :param dir: 导出到目录
-        :param amount: 成交量满足 amount 条件
         :param trade_date: 交易日期为这个之后的
         """
         # 创建目录
         if not os.path.exists(dir):
             os.makedirs(dir)
 
-        # 得到 top 的股票代码
-        codes = self.top_codes(amount)
+        # 获取主板上市一年以上的股票代码
+        codes = self.get_codes()
 
         # 从数据库导出数据
         with self.connection.cursor() as cursor:
@@ -64,11 +61,14 @@ class ExportCodeData(object):
                         "daily_basic.volume_ratio, daily_basic.pe, daily_basic.pe_ttm, " \
                         "daily_basic.pb, daily_basic.ps, daily_basic.ps_ttm, daily_basic.dv_ratio, " \
                         "daily_basic.dv_ttm, daily_basic.total_share, daily_basic.float_share, daily_basic.free_share, " \
-                        "daily_basic.total_mv, daily_basic.circ_mv " \
+                        "daily_basic.total_mv, daily_basic.circ_mv, factor.adj_factor " \
                         "FROM ts_quotation_daily daily " \
                         "JOIN ts_quotation_daily_basic daily_basic ON " \
                         "daily.ts_code=daily_basic.ts_code AND " \
                         "daily.trade_date=daily_basic.trade_date " \
+                        "JOIN ts_quotation_adj_factor factor ON " \
+                        "daily.ts_code=factor.ts_code AND" \
+                        "daily.trade_date=factor.trade_date " \
                         "WHERE daily.ts_code='%s' AND daily.trade_date >= '%s' " \
                         "LIMIT 10000" % (code, trade_date)
 
@@ -90,12 +90,10 @@ class ExportCodeData(object):
 
 if __name__ == '__main__':
     """主程序，解析参数，并执行相关的命令"""
-    parser = argparse.ArgumentParser(description='1）获取2022年后交易量突破 amount 的股票列表；'
-                                                 '2）查询这些股票自 trade_date 以来的数据')
+    parser = argparse.ArgumentParser(description='1）获取上市一年以上的股票列表；'
+                                                 '2）查询这些股票自trade_date以来的数据')
     parser.add_argument('-dir', required=True, type=str,
                         help='Dir of the files')
-    parser.add_argument('-amount', required=True, type=int,
-                        help='Amount of the stock, used for filter')
     parser.add_argument('-trade_date', required=True, type=str,
                         help='Data after trade_date, format yyyymmdd')
     parser.add_argument('-host', required=True, type=str,
@@ -111,6 +109,6 @@ if __name__ == '__main__':
     print("Begin export data, dir: %s, amount: %d, trade_date: %s" % (args.dir, args.amount, args.trade_date))
 
     export = ExportCodeData(args)
-    export.export_data(args.dir, args.amount, args.trade_date)
+    export.export_data(args.dir, args.trade_date)
 
     print("End export data")
