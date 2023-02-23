@@ -109,6 +109,6 @@ if __name__ == '__main__':
     print("Begin export data, dir: %s, trade_date: %s" % (args.dir, args.trade_date))
 
     export = ExportCodeData(args)
-    export.export_data(args.dir, args.trade_date)
+    export.export_data(os.path.join(args.dir, 'features'), args.trade_date)
 
     print("End export data")
