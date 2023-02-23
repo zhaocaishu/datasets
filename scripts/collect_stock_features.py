@@ -67,7 +67,7 @@ class ExportCodeData(object):
                         "daily.ts_code=daily_basic.ts_code AND " \
                         "daily.trade_date=daily_basic.trade_date " \
                         "JOIN ts_quotation_adj_factor factor ON " \
-                        "daily.ts_code=factor.ts_code AND" \
+                        "daily.ts_code=factor.ts_code AND " \
                         "daily.trade_date=factor.trade_date " \
                         "WHERE daily.ts_code='%s' AND daily.trade_date >= '%s' " \
                         "LIMIT 10000" % (code, trade_date)
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # 解析命令行中的参数，得到需要爬取的数据、日期范围
-    print("Begin export data, dir: %s, amount: %d, trade_date: %s" % (args.dir, args.amount, args.trade_date))
+    print("Begin export data, dir: %s, trade_date: %s" % (args.dir, args.trade_date))
 
     export = ExportCodeData(args)
     export.export_data(args.dir, args.trade_date)
