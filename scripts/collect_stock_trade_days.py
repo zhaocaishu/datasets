@@ -31,8 +31,8 @@ class ExportCodeData(object):
         # 从数据库导出数据
         with self.connection.cursor() as cursor:
             # 查询数据
-            query = "SELECT DISTINCT date_format(trade_date, '%Y-%m-%d') " \
-                    "FROM ts_quotation_daily order by trade_date ASC"
+            query = "SELECT DISTINCT exchange, date_format(cal_date, '%Y-%m-%d') " \
+                    "FROM ts_basic_trade_cal WHERE is_open=1"
 
             print(query)
 
@@ -41,7 +41,15 @@ class ExportCodeData(object):
             with open('%s/calendars/days.txt' % dir, 'w') as fp:
                 for row in cursor:
                     list_row = list(row)
-                    fp.write(list_row[0] + '\n')
+                    exchange = list_row[0]
+                    if exchange == 'SSE':
+                        exchange = 'SH'
+                    elif exchange == 'SZSE':
+                        exchange = 'SZ'
+                    else:
+                        raise ValueError('Unsupported exchange type')
+                    trade_date = list_row[1]
+                    fp.write(exchange + '\t' + trade_date + '\n')
 
 
 if __name__ == '__main__':
