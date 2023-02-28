@@ -39,7 +39,7 @@ class ExportCodeData(object):
             for code in cursor:
                 codes.append(code)
 
-        print("Codes: %d, %s" % (len(codes), ",".join(codes)))
+        print("1年以上在主板上市的股票共计%d个" % (len(codes)))
 
         return codes
 

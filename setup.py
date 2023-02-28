@@ -15,7 +15,7 @@ setup(
     name="datasets",
     packages=find_packages(exclude=(
         'tests',
-        'scripts',
+        'tools',
         'docs',
         'examples',
         'requirements',
