@@ -5,9 +5,11 @@ import csv
 
 import mysql.connector
 
+from helpers.industry import name2id as industry_name2id
+
 header = ["Symbol", "Date", "Open", "Close", "High", "Low", "Pre_Close", "Change", "Pct_Chg", "Volume", "AMount",
           "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps', 'Ps_ttm', 'Dv_ratio',
-          'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv', 'Circ_mv', 'Adj_factor']
+          'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv', 'Circ_mv', 'Adj_factor', 'Industry_id']
 
 
 class ExportCodeData(object):
@@ -29,13 +31,13 @@ class ExportCodeData(object):
         """获取一年以上在主板上市的股票
         """
         codes = []
-        query = "SELECT ts_code FROM ts_basic_stock_list WHERE list_status='L' AND market='主板' " \
+        query = "SELECT ts_code, industry FROM ts_basic_stock_list WHERE list_status='L' AND market='主板' " \
                 "AND DATEDIFF(NOW(), DATE_FORMAT(list_date, '%Y%m%d')) >= 360"
 
         with self.connection.cursor() as cursor:
             cursor.execute(query)
             for code in cursor:
-                codes.append(code[0])
+                codes.append(code)
 
         print("Codes: %d, %s" % (len(codes), ",".join(codes)))
 
@@ -55,7 +57,7 @@ class ExportCodeData(object):
 
         # 从数据库导出数据
         with self.connection.cursor() as cursor:
-            for code in codes:
+            for code, industry in codes:
                 # 查询数据
                 query = "SELECT daily.*, daily_basic.turnover_rate, daily_basic.turnover_rate_f, " \
                         "daily_basic.volume_ratio, daily_basic.pe, daily_basic.pe_ttm, " \
@@ -85,6 +87,7 @@ class ExportCodeData(object):
                         list_row = list(row)
                         t_date = list_row[1]
                         list_row[1] = t_date[0:4] + '-' + t_date[4:6] + '-' + t_date[6:8]
+                        list_row.append(industry_name2id[industry])
                         writer.writerow(list_row)
 
 
