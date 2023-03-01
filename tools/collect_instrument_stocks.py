@@ -24,6 +24,7 @@ class ExportCodeData(object):
         """导出数据到文件
         :param dir: 导出到目录
         :param instruments: 指数名称
+        :param trade_date: 交易日期
         """
         # 创建目录
         if not os.path.exists(dir):
@@ -64,6 +65,7 @@ if __name__ == '__main__':
     parser.add_argument('-dir', required=True, type=str,
                         help='Dir of the files')
     parser.add_argument('-instruments', type=str, help='instruments name')
+    parser.add_argument('-trade_date', type=str, help='trade date')
     parser.add_argument('-host', required=True, type=str,
                         help='The address of database')
     parser.add_argument('-user', required=True, type=str,
@@ -74,9 +76,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # 解析命令行中的参数
-    print("Begin export data, dir: %s" % args.dir)
+    print("Begin export data, dir: %s, instruments: %s, date: %s" % (args.dir, args.instruments, args.trade_date))
 
     export = ExportCodeData(args)
-    export.export_data(args.dir)
+    export.export_data(args.dir, args.instruments, args.trade_date)
 
     print("End export data")
