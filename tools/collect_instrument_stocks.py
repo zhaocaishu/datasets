@@ -56,7 +56,7 @@ class ExportCodeData(object):
             with open('%s/instruments/%s.txt' % (dir, instruments), 'w') as fp:
                 for row in cursor:
                     list_row = list(row)
-                    fp.write(list_row[0] + '\t' + list_row[1] + '\t' + list_row[2] + '\n')
+                    fp.write(list_row[0] + '\n')
 
 
 if __name__ == '__main__':
