@@ -20,9 +20,10 @@ class ExportCodeData(object):
             for table in cursor:
                 print(table)
 
-    def export_data(self, dir):
+    def export_data(self, dir, instruments, trade_date):
         """导出数据到文件
         :param dir: 导出到目录
+        :param instruments: 指数名称
         """
         # 创建目录
         if not os.path.exists(dir):
@@ -31,16 +32,27 @@ class ExportCodeData(object):
         # 从数据库导出数据
         with self.connection.cursor() as cursor:
             # 查询数据
-            query = "SELECT ts_code, " \
-                    "MIN(date_format(trade_date, '%Y-%m-%d')), " \
-                    "MAX(date_format(trade_date, '%Y-%m-%d')) " \
-                    "FROM ts_idx_index_weight WHERE index_code='000300.SH' GROUP BY ts_code"
+            if instruments == 'sh300':
+                query = "SELECT DISTINCT ts_code FROM ts_idx_index_weight " \
+                        "WHERE index_code='000300.SH' AND trade_date='%s'" % trade_date
+            elif instruments == 'csi1000':
+                query = "SELECT DISTINCT ts_code FROM ts_idx_index_weight " \
+                        "WHERE index_code='000852.SH' AND trade_date='%s'" % trade_date
+            elif instruments == 'csi500':
+                query = "SELECT DISTINCT ts_code FROM ts_idx_index_weight " \
+                        "WHERE index_code='000905.SH' AND trade_date='%s'" % trade_date
+            elif instruments == 'all':
+                query = "SELECT DISTINCT ts_code FROM ts_idx_index_weight " \
+                        "WHERE index_code in ('000002.SH', '399001.SZ', '000300.SH', '000852.SH', '000905.SH') " \
+                        "AND trade_date='%s'" % trade_date
+            else:
+                raise ValueError('Unknown instruments name')
 
             print(query)
 
             cursor.execute(query)
 
-            with open('%s/instruments/sh300.txt' % dir, 'w') as fp:
+            with open('%s/instruments/%s.txt' % (dir, instruments), 'w') as fp:
                 for row in cursor:
                     list_row = list(row)
                     fp.write(list_row[0] + '\t' + list_row[1] + '\t' + list_row[2] + '\n')
@@ -51,6 +63,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='获取指数里每个股票的起止时间')
     parser.add_argument('-dir', required=True, type=str,
                         help='Dir of the files')
+    parser.add_argument('-instruments', type=str, help='instruments name')
     parser.add_argument('-host', required=True, type=str,
                         help='The address of database')
     parser.add_argument('-user', required=True, type=str,
