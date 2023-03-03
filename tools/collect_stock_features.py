@@ -31,8 +31,8 @@ class ExportCodeData(object):
         """获取一年以上在主板上市的股票
         """
         codes = []
-        query = "SELECT ts_code, industry FROM ts_basic_stock_list WHERE list_status='L' AND market='主板' " \
-                "AND DATEDIFF(NOW(), DATE_FORMAT(list_date, '%Y%m%d')) >= 360"
+        query = "SELECT ts_code, industry FROM ts_basic_stock_list WHERE market in ('主板', '中小板') " \
+                "AND list_status='L' AND DATEDIFF(NOW(), DATE_FORMAT(list_date, '%Y%m%d')) >= 360"
 
         with self.connection.cursor() as cursor:
             cursor.execute(query)
