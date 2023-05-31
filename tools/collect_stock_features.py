@@ -32,7 +32,7 @@ class ExportCodeData(object):
         """
         codes = []
         query = "SELECT stock.ts_code, industry.industry_name_lv1 FROM ts_basic_stock_list stock " \
-                "JOIN ts_idx_sw_member industry ON stock.ts_code = industry.ts_code " \
+                "JOIN ts_idx_sw_member industry ON stock.ts_code = industry.ts_code COLLATE utf8mb4_unicode_ci " \
                 "WHERE stock.market in ('主板', '中小板', '创业板', '科创板') AND stock.list_status = 'L' " \
                 "AND DATEDIFF(NOW(), DATE_FORMAT(stock.list_date, '%Y%m%d')) >= 360"
 
