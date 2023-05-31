@@ -9,7 +9,7 @@ from helpers.industry import name2id as industry_name2id
 
 header = ["Symbol", "Date", "Open", "Close", "High", "Low", "Pre_Close", "Change", "Pct_Chg", "Volume", "AMount",
           "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps', 'Ps_ttm', 'Dv_ratio',
-          'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv', 'Circ_mv', 'Adj_factor', 'Industry_id']
+          'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv', 'Circ_mv', 'Adj_factor', 'Ind_class']
 
 
 class ExportCodeData(object):
@@ -31,8 +31,10 @@ class ExportCodeData(object):
         """获取一年以上在主板上市的股票
         """
         codes = []
-        query = "SELECT ts_code, industry FROM ts_basic_stock_list WHERE market in ('主板', '中小板', '创业板', '科创板') " \
-                "AND list_status = 'L' AND DATEDIFF(NOW(), DATE_FORMAT(list_date, '%Y%m%d')) >= 360 AND industry != 'NULL'"
+        query = "SELECT stock.ts_code, industry.industry_name_lv1 FROM ts_basic_stock_list stock " \
+                "JOIN ts_idx_sw_member industry ON stock.ts_code = industry.ts_code " \
+                "WHERE stock.market in ('主板', '中小板', '创业板', '科创板') AND stock.list_status = 'L' " \
+                "AND DATEDIFF(NOW(), DATE_FORMAT(stock.list_date, '%Y%m%d')) >= 360"
 
         with self.connection.cursor() as cursor:
             cursor.execute(query)
