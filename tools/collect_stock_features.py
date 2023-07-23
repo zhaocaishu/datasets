@@ -84,7 +84,7 @@ class ExportCodeData(object):
                         "JOIN ts_quotation_adj_factor factor ON " \
                         "daily.ts_code=factor.ts_code AND " \
                         "daily.trade_date=factor.trade_date " \
-                        "WHERE daily.ts_code='%s' LIMIT 50000"
+                        "WHERE daily.ts_code='%s' LIMIT 50000" % code
 
                 print(query)
 
