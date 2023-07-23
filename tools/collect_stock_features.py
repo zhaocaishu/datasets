@@ -6,13 +6,12 @@ import csv
 import mysql.connector
 
 from helpers.industry import name2id as industry_name2id
+from helpers.utils import get_codes
 
-META_HEADER = ['Symbol', 'Ind_class', 'List_date']
-
-FEATURE_HEADER = ["Symbol", "Date", "Open", "Close", "High", "Low", "Pre_Close", "Change", "Pct_Chg", "Volume",
-                  "AMount", "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps', 'Ps_ttm',
-                  'Dv_ratio', 'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv', 'Circ_mv', 'Adj_factor',
-                  'Ind_class']
+HEADER = ["Symbol", "Date", "Open", "Close", "High", "Low", "Pre_Close", "Change", "Pct_Chg", "Volume",
+          "AMount", "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps', 'Ps_ttm',
+          'Dv_ratio', 'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv', 'Circ_mv', 'Adj_factor',
+          'Ind_class']
 
 
 class ExportCodeData(object):
@@ -30,24 +29,6 @@ class ExportCodeData(object):
             for table in cursor:
                 print(table)
 
-    def get_codes(self) -> list:
-        """获取全部上市的股票
-        """
-        codes = []
-        query = "SELECT stock.ts_code, industry.industry_name_lv1, DATE_FORMAT(stock.list_date, '%Y-%m-%d') " \
-                "FROM ts_basic_stock_list stock JOIN ts_idx_sw_member industry ON stock.ts_code = industry.ts_code " \
-                "COLLATE utf8mb4_unicode_ci WHERE stock.market in ('主板', '中小板', '创业板', '科创板') " \
-                "AND stock.list_status = 'L'"
-
-        with self.connection.cursor() as cursor:
-            cursor.execute(query)
-            for code in cursor:
-                codes.append(code)
-
-        print("合计%d个股票" % (len(codes)))
-
-        return codes
-
     def export_data(self, save_dir):
         """导出数据到文件
         Args:
@@ -58,19 +39,11 @@ class ExportCodeData(object):
             os.makedirs(save_dir)
 
         # 获取上市的全部股票代码
-        codes = self.get_codes()
-
-        with open('%s/meta.csv' % save_dir, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',',
-                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(META_HEADER)
-
-            for code, industry, list_date in codes:
-                writer.writerow([code, industry, list_date])
+        codes = get_codes()
 
         # 从数据库导出数据
         with self.connection.cursor() as cursor:
-            for code, industry, list_date in codes:
+            for code in codes:
                 # 查询数据
                 query = "SELECT daily.*, daily_basic.turnover_rate, daily_basic.turnover_rate_f, " \
                         "daily_basic.volume_ratio, daily_basic.pe, daily_basic.pe_ttm, " \
@@ -93,13 +66,13 @@ class ExportCodeData(object):
                 with open('%s/%s.csv' % (save_dir, code), 'w', newline='') as csvfile:
                     writer = csv.writer(csvfile, delimiter=',',
                                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    writer.writerow(FEATURE_HEADER)
+                    writer.writerow(HEADER)
 
                     for row in cursor:
                         list_row = list(row)
                         t_date = list_row[1]
                         list_row[1] = t_date[0:4] + '-' + t_date[4:6] + '-' + t_date[6:8]
-                        list_row.append(industry_name2id[industry])
+                        list_row.append(industry_name2id[codes[code][0]])
                         writer.writerow(list_row)
 
 

@@ -5,7 +5,9 @@ import csv
 
 import mysql.connector
 
-HEADER = ["Symbol"]
+from helpers.utils import get_codes
+
+HEADER = ["Symbol", "Trade_date", "Ind_class", "List_date"]
 
 
 class ExportCodeData(object):
@@ -33,6 +35,8 @@ class ExportCodeData(object):
         # 创建目录
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
+
+        codes = get_codes()
 
         # 从数据库导出数据
         with self.connection.cursor() as cursor:
@@ -66,6 +70,8 @@ class ExportCodeData(object):
 
                 for row in cursor:
                     list_row = list(row)
+                    list_row.append(trade_date)
+                    list_row.extend(codes[list_row[0]])
                     writer.writerow(list_row)
 
 
