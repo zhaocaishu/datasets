@@ -7,7 +7,7 @@ import mysql.connector
 
 from helpers.industry import name2id as industry_name2id
 
-META_HEADER = ['Code', 'Ind_class', 'List_date']
+META_HEADER = ['Symbol', 'Ind_class', 'List_date']
 
 FEATURE_HEADER = ["Symbol", "Date", "Open", "Close", "High", "Low", "Pre_Close", "Change", "Pct_Chg", "Volume",
                   "AMount", "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps', 'Ps_ttm',
