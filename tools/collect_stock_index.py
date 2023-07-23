@@ -7,7 +7,7 @@ import mysql.connector
 
 from helpers.utils import get_codes
 
-HEADER = ["Symbol", "Trade_date", "Ind_class", "List_date"]
+HEADER = ["Symbol", "Date", "Ind_class", "List_date"]
 
 
 class ExportCodeData(object):
