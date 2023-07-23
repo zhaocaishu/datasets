@@ -57,7 +57,7 @@ class ExportCodeData(object):
                     else:
                         raise ValueError('Unsupported exchange type')
                     trade_date = list_row[1]
-                    writer.writerow(list_row)
+                    writer.writerow([exchange, trade_date])
 
 
 if __name__ == '__main__':
