@@ -7,9 +7,12 @@ import mysql.connector
 
 from helpers.industry import name2id as industry_name2id
 
-header = ["Symbol", "Date", "Open", "Close", "High", "Low", "Pre_Close", "Change", "Pct_Chg", "Volume", "AMount",
-          "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps', 'Ps_ttm', 'Dv_ratio',
-          'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv', 'Circ_mv', 'Adj_factor', 'Ind_class']
+META_HEADER = ['Code', 'Ind_class', 'List_date']
+
+FEATURE_HEADER = ["Symbol", "Date", "Open", "Close", "High", "Low", "Pre_Close", "Change", "Pct_Chg", "Volume",
+                  "AMount", "Turnover_rate", "Turnover_rate_f", "Volume_ratio", "Pe", "Pe_ttm", 'Pb', 'Ps', 'Ps_ttm',
+                  'Dv_ratio', 'Dv_ttm', 'Total_share', 'Float_share', 'Free_share', 'Total_mv', 'Circ_mv', 'Adj_factor',
+                  'Ind_class']
 
 
 class ExportCodeData(object):
@@ -28,38 +31,46 @@ class ExportCodeData(object):
                 print(table)
 
     def get_codes(self) -> list:
-        """获取一年以上在主板上市的股票
+        """获取全部上市的股票
         """
         codes = []
-        query = "SELECT stock.ts_code, industry.industry_name_lv1 FROM ts_basic_stock_list stock " \
-                "JOIN ts_idx_sw_member industry ON stock.ts_code = industry.ts_code COLLATE utf8mb4_unicode_ci " \
-                "WHERE stock.market in ('主板', '中小板', '创业板', '科创板') AND stock.list_status = 'L' " \
-                "AND DATEDIFF(NOW(), DATE_FORMAT(stock.list_date, '%Y%m%d')) >= 360"
+        query = "SELECT stock.ts_code, industry.industry_name_lv1, DATE_FORMAT(stock.list_date, '%Y-%m-%d') " \
+                "FROM ts_basic_stock_list stock JOIN ts_idx_sw_member industry ON stock.ts_code = industry.ts_code " \
+                "COLLATE utf8mb4_unicode_ci WHERE stock.market in ('主板', '中小板', '创业板', '科创板') " \
+                "AND stock.list_status = 'L'"
 
         with self.connection.cursor() as cursor:
             cursor.execute(query)
             for code in cursor:
                 codes.append(code)
 
-        print("1年以上在主板上市的股票共计%d个" % (len(codes)))
+        print("合计%d个股票" % (len(codes)))
 
         return codes
 
-    def export_data(self, dir, trade_date):
+    def export_data(self, save_dir):
         """导出数据到文件
-        :param dir: 导出到目录
-        :param trade_date: 交易日期为这个之后的
+        Args:
+            save_dir: 导出到目录
         """
         # 创建目录
-        if not os.path.exists(dir):
-            os.makedirs(dir)
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
 
-        # 获取主板上市一年以上的股票代码
+        # 获取上市的全部股票代码
         codes = self.get_codes()
+
+        with open('%s/meta.csv' % save_dir, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(META_HEADER)
+
+            for code, industry, list_date in codes:
+                writer.writerow([code, industry, list_date])
 
         # 从数据库导出数据
         with self.connection.cursor() as cursor:
-            for code, industry in codes:
+            for code, industry, list_date in codes:
                 # 查询数据
                 query = "SELECT daily.*, daily_basic.turnover_rate, daily_basic.turnover_rate_f, " \
                         "daily_basic.volume_ratio, daily_basic.pe, daily_basic.pe_ttm, " \
@@ -73,17 +84,16 @@ class ExportCodeData(object):
                         "JOIN ts_quotation_adj_factor factor ON " \
                         "daily.ts_code=factor.ts_code AND " \
                         "daily.trade_date=factor.trade_date " \
-                        "WHERE daily.ts_code='%s' AND daily.trade_date >= '%s' " \
-                        "LIMIT 10000" % (code, trade_date)
+                        "WHERE daily.ts_code='%s' LIMIT 50000"
 
                 print(query)
 
                 cursor.execute(query)
 
-                with open('%s/%s.csv' % (dir, code), 'w', newline='') as csvfile:
+                with open('%s/%s.csv' % (save_dir, code), 'w', newline='') as csvfile:
                     writer = csv.writer(csvfile, delimiter=',',
                                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    writer.writerow(header)
+                    writer.writerow(FEATURE_HEADER)
 
                     for row in cursor:
                         list_row = list(row)
@@ -95,25 +105,22 @@ class ExportCodeData(object):
 
 if __name__ == '__main__':
     """主程序，解析参数，并执行相关的命令"""
-    parser = argparse.ArgumentParser(description='1）获取上市一年以上的股票列表；'
-                                                 '2）查询这些股票自trade_date以来的数据')
-    parser.add_argument('-dir', required=True, type=str,
-                        help='Dir of the files')
-    parser.add_argument('-trade_date', required=True, type=str,
-                        help='Data after trade_date, format yyyymmdd')
-    parser.add_argument('-host', required=True, type=str,
+    parser = argparse.ArgumentParser(description='查询并保存全部股票数据')
+    parser.add_argument('-save_dir', required=True, type=str,
+                        help='Directory of the saved files')
+    parser.add_argument('-host', required=True, type=str, default='127.0.0.1',
                         help='The address of database')
-    parser.add_argument('-user', required=True, type=str,
+    parser.add_argument('-user', required=True, type=str, default='zcs',
                         help='The user name of database')
-    parser.add_argument('-passwd', required=True, type=str,
+    parser.add_argument('-passwd', required=True, type=str, default='mydaydayup2023!',
                         help='The password of database')
 
     args = parser.parse_args()
 
     # 解析命令行中的参数，得到需要爬取的数据、日期范围
-    print("Begin export data, dir: %s, trade_date: %s" % (args.dir, args.trade_date))
+    print("Begin export data, save directory: %s" % args.save_dir)
 
     export = ExportCodeData(args)
-    export.export_data(os.path.join(args.dir, 'features'), args.trade_date)
+    export.export_data(os.path.join(args.save_dir, 'features'))
 
     print("End export data")
