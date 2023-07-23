@@ -108,12 +108,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='查询并保存全部股票数据')
     parser.add_argument('-save_dir', required=True, type=str,
                         help='Directory of the saved files')
-    parser.add_argument('-host', required=True, type=str, default='127.0.0.1',
-                        help='The address of database')
-    parser.add_argument('-user', required=True, type=str, default='zcs',
-                        help='The user name of database')
-    parser.add_argument('-passwd', required=True, type=str, default='mydaydayup2023!',
-                        help='The password of database')
+    parser.add_argument('-host', type=str, default='127.0.0.1', help='The address of database')
+    parser.add_argument('-user', type=str, default='zcs', help='The user name of database')
+    parser.add_argument('-passwd', type=str, default='mydaydayup2023!', help='The password of database')
 
     args = parser.parse_args()
 

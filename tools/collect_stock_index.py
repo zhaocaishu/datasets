@@ -76,12 +76,9 @@ if __name__ == '__main__':
                         help='Directory of the files')
     parser.add_argument('-index_name', type=str, help='index name')
     parser.add_argument('-trade_date', type=str, help='trade date')
-    parser.add_argument('-host', required=True, type=str, default='127.0.0.1',
-                        help='The address of database')
-    parser.add_argument('-user', required=True, type=str, default='zcs',
-                        help='The user name of database')
-    parser.add_argument('-passwd', required=True, type=str, default='mydaydayup2023!',
-                        help='The password of database')
+    parser.add_argument('-host', type=str, default='127.0.0.1', help='The address of database')
+    parser.add_argument('-user', type=str, default='zcs', help='The user name of database')
+    parser.add_argument('-passwd', type=str, default='mydaydayup2023!', help='The password of database')
 
     args = parser.parse_args()
 
