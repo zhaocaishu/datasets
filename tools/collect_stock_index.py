@@ -36,7 +36,7 @@ class ExportCodeData(object):
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
-        codes = get_codes()
+        codes = get_codes(self.connection)
 
         # 从数据库导出数据
         with self.connection.cursor() as cursor:

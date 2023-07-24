@@ -39,7 +39,7 @@ class ExportCodeData(object):
             os.makedirs(save_dir)
 
         # 获取上市的全部股票代码
-        codes = get_codes()
+        codes = get_codes(self.connection)
 
         # 从数据库导出数据
         with self.connection.cursor() as cursor:
