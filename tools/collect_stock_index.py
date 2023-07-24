@@ -70,9 +70,11 @@ class ExportCodeData(object):
 
                 for row in cursor:
                     list_row = list(row)
-                    list_row.append(trade_date[0:4] + '-' + trade_date[4:6] + '-' + trade_date[6:8])
-                    list_row.extend(codes[list_row[0]])
-                    writer.writerow(list_row)
+                    code = list_row[0]
+                    if code in codes:
+                        list_row.append(trade_date[0:4] + '-' + trade_date[4:6] + '-' + trade_date[6:8])
+                        list_row.extend(codes[code])
+                        writer.writerow(list_row)
 
 
 if __name__ == '__main__':
