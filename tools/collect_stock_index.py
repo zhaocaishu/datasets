@@ -25,12 +25,11 @@ class ExportCodeData(object):
             for table in cursor:
                 print(table)
 
-    def export_data(self, save_dir, index_name, trade_date):
+    def export_data(self, save_dir, index_name):
         """导出数据到文件
         Args:
             save_dir: 导出到目录
             index_name: 指数名称
-            trade_date: 交易日期
         """
         # 创建目录
         if not os.path.exists(save_dir):
@@ -42,20 +41,20 @@ class ExportCodeData(object):
         with self.connection.cursor() as cursor:
             # 查询数据
             if index_name == 'csi100':
-                query = "SELECT DISTINCT ts_code FROM ts_idx_index_weight " \
-                        "WHERE index_code='000903.SH' AND trade_date='%s'" % trade_date
+                query = "SELECT DISTINCT ts_code, trade_date FROM ts_idx_index_weight " \
+                        "WHERE index_code='000903.SH'"
             elif index_name == 'csi500':
-                query = "SELECT DISTINCT ts_code FROM ts_idx_index_weight " \
-                        "WHERE index_code='000905.SH' AND trade_date='%s'" % trade_date
+                query = "SELECT DISTINCT ts_code, trade_date FROM ts_idx_index_weight " \
+                        "WHERE index_code='000905.SH'"
             elif index_name == 'csi1000':
-                query = "SELECT DISTINCT ts_code FROM ts_idx_index_weight " \
-                        "WHERE index_code='000852.SH' AND trade_date='%s'" % trade_date
+                query = "SELECT DISTINCT ts_code, trade_date FROM ts_idx_index_weight " \
+                        "WHERE index_code='000852.SH'"
             elif index_name == 'sh300':
-                query = "SELECT DISTINCT ts_code FROM ts_idx_index_weight " \
-                        "WHERE index_code='000300.SH' AND trade_date='%s'" % trade_date
+                query = "SELECT DISTINCT ts_code, trade_date FROM ts_idx_index_weight " \
+                        "WHERE index_code='000300.SH'"
             elif index_name == 'szzs':
-                query = "SELECT DISTINCT ts_code FROM ts_idx_index_weight " \
-                        "WHERE index_code = '399001.SZ' AND trade_date='%s'" % trade_date
+                query = "SELECT DISTINCT ts_code, trade_date FROM ts_idx_index_weight " \
+                        "WHERE index_code = '399001.SZ'"
             else:
                 raise ValueError('Unknown index name')
 
@@ -70,6 +69,7 @@ class ExportCodeData(object):
 
                 for row in cursor:
                     list_row = list(row)
+                    trade_date = list_row[1]
                     list_row.append(trade_date[0:4] + '-' + trade_date[4:6] + '-' + trade_date[6:8])
                     list_row.extend(codes[list_row[0]])
                     writer.writerow(list_row)
@@ -81,7 +81,6 @@ if __name__ == '__main__':
     parser.add_argument('-save_dir', required=True, type=str,
                         help='Directory of the files')
     parser.add_argument('-index_name', type=str, help='index name')
-    parser.add_argument('-trade_date', type=str, help='trade date')
     parser.add_argument('-host', type=str, default='127.0.0.1', help='The address of database')
     parser.add_argument('-user', type=str, default='zcs', help='The user name of database')
     parser.add_argument('-passwd', type=str, default='mydaydayup2023!', help='The password of database')
@@ -90,9 +89,9 @@ if __name__ == '__main__':
 
     # 解析命令行中的参数
     print("Begin export data, save_dir: %s, index_name: %s, date: %s" % (
-        args.save_dir, args.index_name, args.trade_date))
+        args.save_dir, args.index_name))
 
     export = ExportCodeData(args)
-    export.export_data(args.save_dir, args.index_name, args.trade_date)
+    export.export_data(args.save_dir, args.index_name)
 
     print("End export data")
