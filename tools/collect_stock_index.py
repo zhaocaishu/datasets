@@ -69,10 +69,12 @@ class ExportCodeData(object):
 
                 for row in cursor:
                     list_row = list(row)
-                    trade_date = list_row[1]
-                    list_row.append(trade_date[0:4] + '-' + trade_date[4:6] + '-' + trade_date[6:8])
-                    list_row.extend(codes[list_row[0]])
-                    writer.writerow(list_row)
+                    code_name = list_row[0]
+                    if code_name in codes:
+                        t_date = list_row[1]
+                        list_row[1] = t_date[0:4] + '-' + t_date[4:6] + '-' + t_date[6:8]
+                        list_row.extend(codes[code_name])
+                        writer.writerow(list_row)
 
 
 if __name__ == '__main__':
@@ -88,8 +90,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # 解析命令行中的参数
-    print("Begin export data, save_dir: %s, index_name: %s, date: %s" % (
-        args.save_dir, args.index_name))
+    print("Begin export data, save_dir: %s, index_name: %s" % (args.save_dir, args.index_name))
 
     export = ExportCodeData(args)
     export.export_data(args.save_dir, args.index_name)
