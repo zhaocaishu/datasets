@@ -43,6 +43,9 @@ class ExportCodeData(object):
             if index_name == 'csi100':
                 query = "SELECT DISTINCT ts_code, trade_date FROM ts_idx_index_weight " \
                         "WHERE index_code='000903.SH'"
+            elif index_name == 'csi300':
+                query = "SELECT DISTINCT ts_code, trade_date FROM ts_idx_index_weight " \
+                        "WHERE index_code='000300.SH'"
             elif index_name == 'csi500':
                 query = "SELECT DISTINCT ts_code, trade_date FROM ts_idx_index_weight " \
                         "WHERE index_code='000905.SH'"
@@ -54,7 +57,7 @@ class ExportCodeData(object):
                         "WHERE index_code='000300.SH'"
             elif index_name == 'szzs':
                 query = "SELECT DISTINCT ts_code, trade_date FROM ts_idx_index_weight " \
-                        "WHERE index_code = '399001.SZ'"
+                        "WHERE index_code='399001.SZ'"
             else:
                 raise ValueError('Unknown index name')
 
